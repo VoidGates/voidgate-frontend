@@ -12,7 +12,7 @@ const RULES = [
   { level: 'block', name: 'Segredo hardcoded', re: /(api[_-]?key|secret|passw(or)?d|token)["']?\s*[:=]\s*["'][^"'\s]{12,}["']/i },
   { level: 'block', name: 'Download executado no shell', re: /\b(curl|wget)\b[^\n|]*\|\s*(sudo\s+)?(ba|z)?sh\b/ },
   { level: 'block', name: 'Código decodificado executado', re: /\b(eval|Function)\s*\(\s*(atob|Buffer\.from|unescape|decodeURIComponent)\s*\(/ },
-  { level: 'block', name: 'Caractere Unicode invisível (Trojan Source)', re: /[‪-‮⁦-⁩​⁠]/ },
+  { level: 'block', name: 'Caractere Unicode invisível (Trojan Source)', re: /[\u202A-\u202E\u2066-\u2069\u200B\u2060]/ },
   { level: 'block', name: 'Hook de instalação npm', file: /(^|\/)package\.json$/, re: /"(pre|post)?install"\s*:/ },
   { level: 'block', name: 'Pacote baixado fora do registry npm', file: /(^|\/)package-lock\.json$/, re: /"resolved":\s*"(?!https:\/\/registry\.npmjs\.org\/)/ },
   { level: 'block', name: 'Troca de registry npm', file: /(^|\/)\.npmrc$/, re: /registry\s*=/ },
@@ -44,8 +44,12 @@ export function scan(diff) {
   const files = new Set()
   let file = null
   let line = 0
+  let prev = ''
   for (const raw of diff.split('\n')) {
-    if (raw.startsWith('+++ ')) {
+    // an added line "++ x" also renders as "+++ x"; a real header always follows "--- "
+    const isHeader = raw.startsWith('+++ ') && prev.startsWith('--- ')
+    prev = raw
+    if (isHeader) {
       file = raw === '+++ /dev/null' ? null : raw.slice(6)
       if (file) files.add(file)
       continue
