@@ -1,19 +1,25 @@
-import { useEffect, useState } from 'react'
+import { Audience } from './components/Audience.tsx'
+import { BeforeAfter } from './components/BeforeAfter.tsx'
+import { Footer } from './components/Footer.tsx'
+import { Hero } from './components/Hero.tsx'
+import { HowItWorks } from './components/HowItWorks.tsx'
+import { Nav } from './components/Nav.tsx'
+import { Quiz } from './components/Quiz.tsx'
+import { TryAttack } from './components/TryAttack.tsx'
 
 export default function App() {
-  const [status, setStatus] = useState('verificando...')
-
-  useEffect(() => {
-    fetch('/api/health')
-      .then((r) => r.json())
-      .then((d) => setStatus(d.status))
-      .catch(() => setStatus('backend offline'))
-  }, [])
-
   return (
-    <main style={{ padding: 32 }}>
-      <h1>VoidGate</h1>
-      <p>Backend: {status}</p>
-    </main>
+    <>
+      <Nav />
+      <main>
+        <Hero />
+        <TryAttack />
+        <BeforeAfter />
+        <HowItWorks />
+        <Quiz />
+        <Audience />
+      </main>
+      <Footer />
+    </>
   )
 }
