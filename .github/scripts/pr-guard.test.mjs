@@ -26,6 +26,15 @@ test('regras por arquivo só valem no arquivo certo', () => {
   assert.ok(!names(diff('package-lock.json', '"resolved": "https://registry.npmjs.org/x/-/x.tgz",')).some(n => n.startsWith('block')))
 })
 
+test('regras de Rust', () => {
+  assert.ok(names(diff('build.rs', 'fn main() {}')).includes('block:build.rs do Cargo (executa código ao compilar)'))
+  assert.ok(names(diff('Cargo.toml', 'x = { git = "https://evil.io/x" }')).includes('block:Dependência Rust fora do crates.io'))
+  assert.ok(!names(diff('Cargo.toml', 'axum = "0.8"')).some(n => n.startsWith('block')))
+  assert.ok(names(diff('Cargo.lock', 'source = "git+https://evil.io/x"')).includes('block:Crate baixado fora do crates.io'))
+  assert.ok(!names(diff('Cargo.lock', 'source = "registry+https://github.com/rust-lang/crates.io-index"')).some(n => n.startsWith('block')))
+  assert.ok(names(diff('src/main.rs', 'Command::new("sh")')).includes('warn:Executa processo externo (Rust)'))
+})
+
 test('aponta a linha correta', () => {
   const [f] = scan(diff('src/a.ts', 'ok', 'const t = "ghp_' + 'a'.repeat(36) + '"'))
   assert.equal(f.line, 11)

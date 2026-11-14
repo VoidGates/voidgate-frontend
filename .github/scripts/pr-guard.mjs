@@ -16,9 +16,17 @@ const RULES = [
   { level: 'block', name: 'Hook de instalação npm', file: /(^|\/)package\.json$/, re: /"(pre|post)?install"\s*:/ },
   { level: 'block', name: 'Pacote baixado fora do registry npm', file: /(^|\/)package-lock\.json$/, re: /"resolved":\s*"(?!https:\/\/registry\.npmjs\.org\/)/ },
   { level: 'block', name: 'Troca de registry npm', file: /(^|\/)\.npmrc$/, re: /registry\s*=/ },
+  // Rust: build.rs roda código na máquina de quem compila, igual a um postinstall
+  { level: 'block', name: 'build.rs do Cargo (executa código ao compilar)', file: /(^|\/)build\.rs$/, re: /\S/ },
+  { level: 'block', name: 'Build script declarado no Cargo.toml', file: /(^|\/)Cargo\.toml$/, re: /^\s*build\s*=/ },
+  { level: 'block', name: 'Dependência Rust fora do crates.io', file: /(^|\/)Cargo\.toml$/, re: /\b(git|registry)\s*=/ },
+  { level: 'block', name: 'Crate baixado fora do crates.io', file: /(^|\/)Cargo\.lock$/, re: /^source\s*=\s*"(?!registry\+https:\/\/github\.com\/rust-lang\/crates\.io-index")/ },
+  { level: 'block', name: 'Configuração do Cargo alterada (registry/fonte)', file: /(^|\/)\.cargo\/config(\.toml)?$/, re: /\S/ },
   // warn: legitimate sometimes, needs a human look
   { level: 'warn', name: 'eval / new Function', re: /\beval\s*\(|\bnew Function\s*\(/ },
   { level: 'warn', name: 'child_process', re: /child_process/ },
+  { level: 'warn', name: 'Executa processo externo (Rust)', re: /\bCommand::new\s*\(/ },
+  { level: 'warn', name: 'Bloco unsafe (Rust)', re: /\bunsafe\s*(\{|fn\b|impl\b)/ },
   { level: 'warn', name: 'Blob base64/hex longo (possível payload ofuscado)', re: /[A-Za-z0-9+/=]{200,}|(\\x[0-9a-f]{2}){30,}/i },
   { level: 'warn', name: 'Workflow usa pull_request_target', file: /^\.github\/workflows\//, re: /pull_request_target/ },
   { level: 'warn', name: 'Workflow acessa secrets', file: /^\.github\/workflows\//, re: /\$\{\{\s*secrets\./ },
@@ -27,6 +35,7 @@ const RULES = [
 const SENSITIVE_PATHS = [
   [/^\.github\//, 'Altera CI/CD (.github/) — revise com atenção redobrada'],
   [/(^|\/)package\.json$/, 'Altera dependências ou scripts npm'],
+  [/(^|\/)Cargo\.toml$/, 'Altera dependências Rust'],
   [/(^|\/)vite\.config\.[jt]s$/, 'Altera a configuração do build'],
 ]
 
