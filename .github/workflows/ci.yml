@@ -1,0 +1,25 @@
+name: CI
+
+# Lint + build on every PR and in the merge queue. Separate from the deploy
+# workflow so PR code never runs with the Pages/OIDC permissions.
+on:
+  pull_request:
+  merge_group:
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
