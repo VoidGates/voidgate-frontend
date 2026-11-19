@@ -1,3 +1,12 @@
+# Este repositório foi substituído
+
+O VoidGate agora é um repositório só: [VoidGates/VoidGate](https://github.com/VoidGates/VoidGate).
+
+A página principal está em https://voidgates.github.io/VoidGate/.
+
+O texto abaixo ficou de quando a API e o site eram repositórios separados.
+
+---
 # voidgate-frontend
 
 Interface web da **VoidGate**, a camada de segurança entre aplicações e modelos de IA.
